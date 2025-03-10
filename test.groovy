@@ -1,33 +1,45 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'java21'  // Use the JDK you configured
+        maven 'Maven-3.9.9'
+    }
+
     stages {
-        stage('Get Source Code') {
+        stage('Check Java Version') {
             steps {
-                git credentialsId: '291a3c49-fa9f-409c-ad87-cae9c219fcf6', url: 'https://github.com/veerpatil/JenkinsDemo.git'
-                echo 'Hello World'
+                bat 'java -version'  // Ensure JDK 21 is being used
             }
         }
-        stage('Build code')
-                {
-                    steps
-                            {
-                                bat script: 'mvn compile'
-                            }
-                }
-        stage('Run Test')
-                {
-                    steps
-                            {
-                                bat script: 'mvn test -Dbrowser=localchrome'
-                            }
-                }
-        stage('Publish Report')
-                {
-                    steps
-                            {
-                                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '', reportFiles: 'target/surefire-reports/Extent*.html', reportName: 'Pipeline', reportTitles: ''])
-                            }
-                }
+
+        stage('Get Source Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Ayush-Bitla/CI-CD-Selenium-Pipeline-in-Jenkins-for-Nodejs.git'
+            }
+        }
+
+        stage('Build Code') {
+            steps {
+                bat 'mvn clean compile'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                bat 'mvn test -Dbrowser=localchrome'
+            }
+        }
+
+        stage('Publish Report') {
+            steps {
+                publishHTML([
+                    allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, 
+                    reportDir: 'target/surefire-reports', 
+                    reportFiles: 'Extent*.html', 
+                    reportName: 'Test Report'
+                ])
+            }
+        }
     }
 }
